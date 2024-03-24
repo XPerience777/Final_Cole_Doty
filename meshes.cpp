@@ -7,7 +7,7 @@
 //	Created for CS-330-Computational Graphics and Visualization, Nov. 7th, 2022
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "Final_meshes.h"
+#include "meshes.h"
 
 #include <vector>
 

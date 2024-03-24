@@ -15,15 +15,15 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Final_meshes.cpp">
+    <ClCompile Include="..\..\meshes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Final_Source.cpp">
+    <ClCompile Include="..\..\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\Final_meshes.h">
+    <ClInclude Include="..\..\meshes.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

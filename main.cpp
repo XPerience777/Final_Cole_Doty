@@ -29,6 +29,8 @@ namespace
 	const int WINDOW_WIDTH = 1920;
 	const int WINDOW_HEIGHT = 1080;
 
+	unsigned int samples = 16;
+
 	// Stores the GL data relative to a given mesh
 	struct GLMesh
 	{
@@ -40,12 +42,20 @@ namespace
 	// Main GLFW window
 	GLFWwindow* gWindow = nullptr;
 	// Texture id
-	GLuint gTextureIdWood;
+	GLuint gTextureIdDesk;
 	GLuint gTextureIdPlastic;
-	GLuint gTextureIdWallpaper;
-	GLuint gTextureIdMetal;
-	GLuint gTextureIdLeather;
-	GLuint gTextureIdKeys;
+	GLuint gTextureIdLampshade;
+	GLuint gTextureIdMount;
+	GLuint gTextureIdKeyboard;
+	GLuint gTextureIdCarpet;
+	GLuint gTextureIdWall;
+	GLuint gTextureIdWallpapermain;
+	GLuint gTextureIdWallpaperside;
+	GLuint gTextureIdBulb;
+	GLuint gTextureIdArmrest;
+	GLuint gTextureIdMousepad;
+
+
 	// Shader program
 	GLuint gProgramId;
 
@@ -130,16 +140,21 @@ const GLchar* fragmentShaderSource = GLSL(440,
 	uniform vec3 light1Position;
 	uniform vec3 light2Color;
 	uniform vec3 light2Position;
+	uniform vec3 light3Color;
+	uniform vec3 light3Position;
 	uniform vec3 viewPosition;
 	uniform sampler2D uTexture; // Useful when working with multiple textures
 	uniform bool ubHasTexture;
 	uniform float light1Strength = 0.1f; // Set ambient or global lighting strength
 	uniform float light2Strength = 0.1f; // Set lighting strength
+	uniform float light3Strength = 0.1f; // Set lighting strength
 	uniform float ambientStrength = 0.1f; // Set lighting strength
 	uniform float specularIntensity1 = 0.8f;
 	uniform float highlightSize1 = 16.0f;
 	uniform float specularIntensity2 = 0.8f;
 	uniform float highlightSize2 = 16.0f;
+	uniform float specularIntensity3 = 0.8f;
+	uniform float highlightSize3 = 16.0f;
 
 	void main()
 	{
@@ -156,36 +171,44 @@ const GLchar* fragmentShaderSource = GLSL(440,
 		vec3 light2Direction = normalize(light2Position - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
 		float impact2 = max(dot(norm, light2Direction), 0.0);// Calculate diffuse impact by generating dot product of normal and light
 		vec3 diffuse2 = light2Strength * impact2 * light2Color; // Generate diffuse light color
+		vec3 light3Direction = normalize(light3Position - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
+		float impact3 = max(dot(norm, light3Direction), 0.0);// Calculate diffuse impact by generating dot product of normal and light
+		vec3 diffuse3 = light3Strength * impact3 * light3Color; // Generate diffuse light color
 
 		//**Calculate Specular lighting**
 		vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
 		vec3 reflectDir1 = reflect(-light1Direction, norm);// Calculate reflection vector
+		vec3 reflectDir2 = reflect(-light2Direction, norm);// Calculate reflection vector
+		vec3 reflectDir3 = reflect(-light3Direction, norm);// Calculate reflection vector
 		//Calculate specular component
 		float specularComponent1 = pow(max(dot(viewDir, reflectDir1), 0.0), highlightSize1);
 		vec3 specular1 = specularIntensity1 * specularComponent1 * light1Color;
-		vec3 reflectDir2 = reflect(-light2Direction, norm);// Calculate reflection vector
-		//Calculate specular component
 		float specularComponent2 = pow(max(dot(viewDir, reflectDir2), 0.0), highlightSize2);
 		vec3 specular2 = specularIntensity2 * specularComponent2 * light2Color;
+		float specularComponent3 = pow(max(dot(viewDir, reflectDir3), 0.0), highlightSize3);
+		vec3 specular3 = specularIntensity3 * specularComponent3 * light2Color;
 
 		//**Calculate phong result**
 		//Texture holds the color to be used for all three components
 		vec4 textureColor = texture(uTexture, vertexTextureCoordinate);
 		vec3 phong1;
 		vec3 phong2;
+		vec3 phong3;
 
 		if (ubHasTexture == true)
 		{
 			phong1 = (ambient + diffuse1 + specular1) * textureColor.xyz;
 			phong2 = (ambient + diffuse2 + specular2) * textureColor.xyz;
+			phong3 = (ambient + diffuse3 + specular3) * textureColor.xyz;
 		}
 		else
 		{
 			phong1 = (ambient + diffuse1 + specular1) * objectColor.xyz;
 			phong2 = (ambient + diffuse2 + specular2) * objectColor.xyz;
+			phong3 = (ambient + diffuse3 + specular3) * objectColor.xyz;
 		}
 
-		fragmentColor = vec4(phong1 + phong2, 1.0); // Send lighting results to GPU
+		fragmentColor = vec4(phong1 + phong2 + phong3, 1.0); // Send lighting results to GPU
 	}
 	);
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -226,8 +249,8 @@ int main(int argc, char* argv[])
 		return EXIT_FAILURE;
 
 	// Load textures
-	const char* texFilename = "../../resources/textures/wood.png";
-	if (!UCreateTexture(texFilename, gTextureIdWood))
+	const char* texFilename = "../../resources/textures/desk.png";
+	if (!UCreateTexture(texFilename, gTextureIdDesk))
 	{
 		cout << "Failed to load texture " << texFilename << endl;
 		return EXIT_FAILURE;
@@ -240,53 +263,116 @@ int main(int argc, char* argv[])
 		return EXIT_FAILURE;
 	}
 
-	texFilename = "../../resources/textures/wallpaper.png";
-	if (!UCreateTexture(texFilename, gTextureIdWallpaper))
+	texFilename = "../../resources/textures/lampshade.jpg";
+	if (!UCreateTexture(texFilename, gTextureIdLampshade))
 	{
 		cout << "Failed to load texture " << texFilename << endl;
 		return EXIT_FAILURE;
 	}
 
-	texFilename = "../../resources/textures/metal.jpg";
-	if (!UCreateTexture(texFilename, gTextureIdMetal))
+	texFilename = "../../resources/textures/mount.jpg";
+	if (!UCreateTexture(texFilename, gTextureIdMount))
 	{
 		cout << "Failed to load texture " << texFilename << endl;
 		return EXIT_FAILURE;
 	}
 
-	texFilename = "../../resources/textures/leather.jpg";
-	if (!UCreateTexture(texFilename, gTextureIdLeather))
+	texFilename = "../../resources/textures/keyboard.jpg";
+	if (!UCreateTexture(texFilename, gTextureIdKeyboard))
 	{
 		cout << "Failed to load texture " << texFilename << endl;
 		return EXIT_FAILURE;
 	}
 
-	texFilename = "../../resources/textures/metalkeys.png";
-	if (!UCreateTexture(texFilename, gTextureIdKeys))
+	texFilename = "../../resources/textures/carpet.png";
+	if (!UCreateTexture(texFilename, gTextureIdCarpet))
 	{
 		cout << "Failed to load texture " << texFilename << endl;
 		return EXIT_FAILURE;
 	}
+
+	texFilename = "../../resources/textures/wall.png";
+	if (!UCreateTexture(texFilename, gTextureIdWall))
+	{
+		cout << "Failed to load texture " << texFilename << endl;
+		return EXIT_FAILURE;
+	}
+
+	texFilename = "../../resources/textures/wallpapermain.png";
+	if (!UCreateTexture(texFilename, gTextureIdWallpapermain))
+	{
+		cout << "Failed to load texture " << texFilename << endl;
+		return EXIT_FAILURE;
+	}
+
+	texFilename = "../../resources/textures/wallpaperside.jpg";
+	if (!UCreateTexture(texFilename, gTextureIdWallpaperside))
+	{
+		cout << "Failed to load texture " << texFilename << endl;
+		return EXIT_FAILURE;
+	}
+
+
+	texFilename = "../../resources/textures/bulb.jpg";
+	if (!UCreateTexture(texFilename, gTextureIdBulb))
+	{
+		cout << "Failed to load texture " << texFilename << endl;
+		return EXIT_FAILURE;
+	}
+
+	texFilename = "../../resources/textures/armrest.jpg";
+	if (!UCreateTexture(texFilename, gTextureIdArmrest))
+	{
+		cout << "Failed to load texture " << texFilename << endl;
+		return EXIT_FAILURE;
+	}
+
+	texFilename = "../../resources/textures/mousepad.jpg";
+	if (!UCreateTexture(texFilename, gTextureIdMousepad))
+	{
+		cout << "Failed to load texture " << texFilename << endl;
+		return EXIT_FAILURE;
+	}
+
 
 
 	// bind textures on corresponding texture units
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, gTextureIdWood);
+	glBindTexture(GL_TEXTURE_2D, gTextureIdDesk);
 
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, gTextureIdPlastic);
 
 	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, gTextureIdWallpaper);
+	glBindTexture(GL_TEXTURE_2D, gTextureIdLampshade);
 
 	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, gTextureIdMetal);
+	glBindTexture(GL_TEXTURE_2D, gTextureIdMount);
 
 	glActiveTexture(GL_TEXTURE4);
-	glBindTexture(GL_TEXTURE_2D, gTextureIdLeather);
+	glBindTexture(GL_TEXTURE_2D, gTextureIdKeyboard);
 
 	glActiveTexture(GL_TEXTURE5);
-	glBindTexture(GL_TEXTURE_2D, gTextureIdKeys);
+	glBindTexture(GL_TEXTURE_2D, gTextureIdCarpet);
+
+	glActiveTexture(GL_TEXTURE6);
+	glBindTexture(GL_TEXTURE_2D, gTextureIdWall);
+
+	glActiveTexture(GL_TEXTURE7);
+	glBindTexture(GL_TEXTURE_2D, gTextureIdWallpapermain);
+
+	glActiveTexture(GL_TEXTURE8);
+	glBindTexture(GL_TEXTURE_2D, gTextureIdWallpaperside);
+
+	glActiveTexture(GL_TEXTURE9);
+	glBindTexture(GL_TEXTURE_2D, gTextureIdBulb);
+
+	glActiveTexture(GL_TEXTURE10);
+	glBindTexture(GL_TEXTURE_2D, gTextureIdArmrest);
+
+	glActiveTexture(GL_TEXTURE11);
+	glBindTexture(GL_TEXTURE_2D, gTextureIdMousepad);
+
 
 	// Sets the background color of the window to black (it will be implicitely used by glClear)
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -316,12 +402,18 @@ int main(int argc, char* argv[])
 	meshes.DestroyMeshes();
 
 	// Release texture
-	UDestroyTexture(gTextureIdWood);
+	UDestroyTexture(gTextureIdDesk);
 	UDestroyTexture(gTextureIdPlastic);
-	UDestroyTexture(gTextureIdWallpaper);
-	UDestroyTexture(gTextureIdMetal);
-	UDestroyTexture(gTextureIdLeather);
-	UDestroyTexture(gTextureIdKeys);
+	UDestroyTexture(gTextureIdLampshade);
+	UDestroyTexture(gTextureIdMount);
+	UDestroyTexture(gTextureIdKeyboard);
+	UDestroyTexture(gTextureIdCarpet);
+	UDestroyTexture(gTextureIdWall);
+	UDestroyTexture(gTextureIdWallpapermain);
+	UDestroyTexture(gTextureIdWallpaperside);
+	UDestroyTexture(gTextureIdBulb);
+	UDestroyTexture(gTextureIdArmrest);
+	UDestroyTexture(gTextureIdMousepad);
 
 	// Release shader program
 	UDestroyShaderProgram(gProgramId);
@@ -339,6 +431,7 @@ bool UInitialize(int argc, char* argv[], GLFWwindow** window)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_SAMPLES, samples);
 
 #ifdef __APPLE__
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
@@ -496,15 +589,20 @@ void URender()
 	GLint ambColLoc;
 	GLint light1ColLoc;
 	GLint light1PosLoc;
+	GLint light1StrLoc;
 	GLint light2ColLoc;
 	GLint light2PosLoc;
-	GLint light1StrLoc;
 	GLint light2StrLoc;
+	GLint light3ColLoc;
+	GLint light3PosLoc;
+	GLint light3StrLoc;
 	GLint objColLoc;
 	GLint specInt1Loc;
 	GLint highlghtSz1Loc;
 	GLint specInt2Loc;
 	GLint highlghtSz2Loc;
+	GLint specInt3Loc;
+	GLint highlghtSz3Loc;
 	GLint uHasTextureLoc;
 	bool ubHasTextureVal;
 	glm::mat4 scale;
@@ -518,6 +616,8 @@ void URender()
 
 	// Enable z-depth
 	glEnable(GL_DEPTH_TEST);
+
+	glEnable(GL_MULTISAMPLE);
 
 	// Clear the frame and z buffers
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -549,15 +649,20 @@ void URender()
 	ambColLoc = glGetUniformLocation(gProgramId, "ambientColor");
 	light1ColLoc = glGetUniformLocation(gProgramId, "light1Color");
 	light1PosLoc = glGetUniformLocation(gProgramId, "light1Position");
+	light1StrLoc = glGetUniformLocation(gProgramId, "light1Strength");
 	light2ColLoc = glGetUniformLocation(gProgramId, "light2Color");
 	light2PosLoc = glGetUniformLocation(gProgramId, "light2Position");
-	light1StrLoc = glGetUniformLocation(gProgramId, "light1Strength");
 	light2StrLoc = glGetUniformLocation(gProgramId, "light2Strength");
+	light3ColLoc = glGetUniformLocation(gProgramId, "light3Color");
+	light3PosLoc = glGetUniformLocation(gProgramId, "light3Position");
+	light3StrLoc = glGetUniformLocation(gProgramId, "light3Strength");
 	objColLoc = glGetUniformLocation(gProgramId, "objectColor");
 	specInt1Loc = glGetUniformLocation(gProgramId, "specularIntensity1");
 	highlghtSz1Loc = glGetUniformLocation(gProgramId, "highlightSize1");
 	specInt2Loc = glGetUniformLocation(gProgramId, "specularIntensity2");
 	highlghtSz2Loc = glGetUniformLocation(gProgramId, "highlightSize2");
+	specInt3Loc = glGetUniformLocation(gProgramId, "specularIntensity3");
+	highlghtSz3Loc = glGetUniformLocation(gProgramId, "highlightSize3");
 	uHasTextureLoc = glGetUniformLocation(gProgramId, "ubHasTexture");
 
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
@@ -569,18 +674,23 @@ void URender()
 	glUniform1f(ambStrLoc, 1.0f);
 	//set ambient color
 	glUniform3f(ambColLoc, 0.2f, 0.2f, 0.2f);
-	glUniform3f(light1ColLoc, 0.2f, 0.2f, 0.2f);
-	glUniform3f(light1PosLoc, 3.0f, 2.0f, -2.0f);
-	glUniform3f(light2ColLoc, 0.2f, 0.2f, 0.2f);
-	glUniform3f(light2PosLoc, 0.0f, 4.0f, 0.0f);
+	glUniform3f(light1ColLoc, 0.6f, 0.4f, 0.2f);
+	glUniform3f(light1PosLoc, 30.0f, 16.0f, -10.0f);
 	glUniform1f(light1StrLoc, 0.5f); //lighting strength set to 10%
+	glUniform3f(light2ColLoc, 0.2f, 0.2f, 0.2f);
+	glUniform3f(light2PosLoc, 0.0f, 33.0f, 20.0f);
 	glUniform1f(light2StrLoc, 1.0f); //lighting strength set to 100%
+	glUniform3f(light3ColLoc, 0.2f, 0.2f, 0.5f);
+	glUniform3f(light3PosLoc, -3.5f, 5.0f, -3.39f);
+	glUniform1f(light3StrLoc, 1.0f); //lighting strength set to 100%
 	//set specular intensity
-	glUniform1f(specInt1Loc, 5.0f);
-	glUniform1f(specInt2Loc, 10.0f);
+	glUniform1f(specInt1Loc, 1.0f);
+	glUniform1f(specInt2Loc, 2.0f);
+	glUniform1f(specInt3Loc, 1.0f);
 	//set specular highlight size
-	glUniform1f(highlghtSz1Loc, 3.0f);
-	glUniform1f(highlghtSz2Loc, 12.0f);
+	glUniform1f(highlghtSz1Loc, 1.0f);
+	glUniform1f(highlghtSz2Loc, 2.0f);
+	glUniform1f(highlghtSz3Loc, 1.0f);
 
 	ubHasTextureVal = true;
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
@@ -611,10 +721,41 @@ void URender()
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
 	// We set the texture as texture unit 0
-	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 0);
+	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 6);
 
 	// Draws the triangles
 	glDrawElements(GL_TRIANGLES, meshes.gBoxMesh.nIndices, GL_UNSIGNED_INT, (void*)0);
+
+	// Deactivate the Vertex Array Object
+	glBindVertexArray(0);
+
+	//FLOOR
+	// Activate the VBOs contained within the mesh's VAO
+	glBindVertexArray(meshes.gPlaneMesh.vao);
+
+	// 1. Scales the object
+	scale = glm::scale(glm::vec3(35.0f, 00.0f, 35.0f));
+	// 2. Rotate the object
+	rotation = glm::rotate(0.0f, glm::vec3(1.0, 1.0f, 1.0f));
+	// 3. Position the object
+	translation = glm::translate(glm::vec3(-0.0f, -15.49f, 20.0f));
+	// Model matrix: transformations are applied right-to-left order
+	model = translation * rotation * scale;
+	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+	glProgramUniform4f(gProgramId, objColLoc, 0.5f, 0.5f, 0.5f, 1.0f);
+
+	ubHasTextureVal = true;
+	glUniform1i(uHasTextureLoc, ubHasTextureVal);
+
+	// We set the texture as texture unit 0
+	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 5);
+
+	// Draws the triangles
+	glDrawArrays(GL_TRIANGLES, 0, meshes.gPlaneMesh.nVertices);
+
+	// Draws the triangles
+	glDrawElements(GL_TRIANGLES, meshes.gPlaneMesh.nIndices, GL_UNSIGNED_INT, (void*)0);
 
 	// Deactivate the Vertex Array Object
 	glBindVertexArray(0);
@@ -663,7 +804,7 @@ void URender()
 	glProgramUniform4f(gProgramId, objColLoc, 0.0f, 1.0f, 0.0f, 1.0f);
 
 	// We set the texture as texture unit 0
-	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
+	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 6);
 
 	// Draws the triangles
 	glDrawElements(GL_TRIANGLES, meshes.gSphereMesh.nIndices, GL_UNSIGNED_INT, (void*)0);
@@ -1128,7 +1269,7 @@ void URender()
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
 	// We set the texture as texture unit 0
-	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
+	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 2);
 
 
 	// Draws the triangles
@@ -1157,7 +1298,7 @@ void URender()
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
 	// We set the texture as texture unit 0
-	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
+	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 2);
 
 
 	// Draws the triangles
@@ -1186,7 +1327,7 @@ void URender()
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
 	// We set the texture as texture unit 0
-	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
+	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 2);
 
 
 	// Draws the triangles
@@ -1215,7 +1356,7 @@ void URender()
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
 	// We set the texture as texture unit 0
-	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
+	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 2);
 
 
 	// Draws the triangles
@@ -1325,7 +1466,7 @@ void URender()
 	glProgramUniform4f(gProgramId, objColLoc, 0.17f, 0.9f, 0.0f, 0.0f);
 
 	// We set the texture as texture unit 0
-	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
+	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 6);
 
 
 	// Draws the triangles
@@ -1353,7 +1494,7 @@ void URender()
 	glProgramUniform4f(gProgramId, objColLoc, 0.0f, 1.0f, 0.0f, 1.0f);
 
 	// We set the texture as texture unit 0
-	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
+	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 6);
 
 	// Draws the triangles
 	glDrawElements(GL_TRIANGLES, meshes.gSphereMesh.nIndices, GL_UNSIGNED_INT, (void*)0);
@@ -1924,7 +2065,7 @@ void URender()
 	glProgramUniform4f(gProgramId, objColLoc, 1.0f, 0.0f, 0.0f, 1.0f);
 
 	// We set the texture as texture unit 0
-	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 2);
+	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 7);
 
 
 	// Draws the triangles
@@ -1978,7 +2119,7 @@ void URender()
 	glProgramUniform4f(gProgramId, objColLoc, 1.0f, 0.0f, 0.0f, 1.0f);
 
 	// We set the texture as texture unit 0
-	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 2);
+	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 8);
 
 
 	// Draws the triangles
@@ -2032,7 +2173,7 @@ void URender()
 	glProgramUniform4f(gProgramId, objColLoc, 1.0f, 0.0f, 0.0f, 1.0f);
 
 	// We set the texture as texture unit 0
-	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 2);
+	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 8);
 
 
 	// Draws the triangles
@@ -2064,7 +2205,7 @@ void URender()
 	glProgramUniform4f(gProgramId, objColLoc, 0.17f, 0.9f, 0.0f, 0.0f);
 
 	// We set the texture as texture unit 0
-	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
+	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 
 	// Draws the triangles
@@ -2092,10 +2233,7 @@ void URender()
 	glProgramUniform4f(gProgramId, objColLoc, 0.75f, 0.0f, 0.5f, 0.0f);
 
 	// We set the texture as texture unit 0
-	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, gTextureIdWood);
+	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 	// Draws the triangles
 	glDrawElements(GL_TRIANGLES, meshes.gBoxMesh.nIndices, GL_UNSIGNED_INT, (void*)0);
@@ -2120,7 +2258,7 @@ void URender()
 	glProgramUniform4f(gProgramId, objColLoc, 0.17f, 0.9f, 0.0f, 0.0f);
 
 	// We set the texture as texture unit 0
-	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
+	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 
 	// Draws the triangles
@@ -2148,10 +2286,7 @@ void URender()
 	glProgramUniform4f(gProgramId, objColLoc, 0.75f, 0.0f, 0.5f, 0.0f);
 
 	// We set the texture as texture unit 0
-	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, gTextureIdWood);
+	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 	// Draws the triangles
 	glDrawElements(GL_TRIANGLES, meshes.gBoxMesh.nIndices, GL_UNSIGNED_INT, (void*)0);
@@ -2176,7 +2311,7 @@ void URender()
 	glProgramUniform4f(gProgramId, objColLoc, 0.17f, 0.9f, 0.0f, 0.0f);
 
 	// We set the texture as texture unit 0
-	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
+	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 
 	// Draws the triangles
@@ -2204,10 +2339,7 @@ void URender()
 	glProgramUniform4f(gProgramId, objColLoc, 0.75f, 0.0f, 0.5f, 0.0f);
 
 	// We set the texture as texture unit 0
-	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, gTextureIdWood);
+	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 	// Draws the triangles
 	glDrawElements(GL_TRIANGLES, meshes.gBoxMesh.nIndices, GL_UNSIGNED_INT, (void*)0);
@@ -2288,7 +2420,7 @@ void URender()
 	glProgramUniform4f(gProgramId, objColLoc, 0.17f, 0.9f, 0.0f, 0.0f);
 
 	// We set the texture as texture unit 0
-	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
+	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 
 	// Draws the triangles
@@ -2316,10 +2448,7 @@ void URender()
 	glProgramUniform4f(gProgramId, objColLoc, 0.75f, 0.0f, 0.5f, 0.0f);
 
 	// We set the texture as texture unit 0
-	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, gTextureIdWood);
+	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 	// Draws the triangles
 	glDrawElements(GL_TRIANGLES, meshes.gBoxMesh.nIndices, GL_UNSIGNED_INT, (void*)0);
@@ -2344,7 +2473,7 @@ void URender()
 	glProgramUniform4f(gProgramId, objColLoc, 0.17f, 0.9f, 0.0f, 0.0f);
 
 	// We set the texture as texture unit 0
-	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
+	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 
 	// Draws the triangles
@@ -2372,10 +2501,7 @@ void URender()
 	glProgramUniform4f(gProgramId, objColLoc, 0.75f, 0.0f, 0.5f, 0.0f);
 
 	// We set the texture as texture unit 0
-	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, gTextureIdWood);
+	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 	// Draws the triangles
 	glDrawElements(GL_TRIANGLES, meshes.gBoxMesh.nIndices, GL_UNSIGNED_INT, (void*)0);
@@ -2400,10 +2526,7 @@ void URender()
 	glProgramUniform4f(gProgramId, objColLoc, 0.75f, 0.0f, 0.5f, 0.0f);
 
 	// We set the texture as texture unit 0
-	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, gTextureIdWood);
+	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 	// Draws the triangles
 	glDrawElements(GL_TRIANGLES, meshes.gBoxMesh.nIndices, GL_UNSIGNED_INT, (void*)0);
@@ -2428,10 +2551,7 @@ void URender()
 	glProgramUniform4f(gProgramId, objColLoc, 0.75f, 0.0f, 0.5f, 0.0f);
 
 	// We set the texture as texture unit 0
-	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, gTextureIdWood);
+	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 	// Draws the triangles
 	glDrawElements(GL_TRIANGLES, meshes.gBoxMesh.nIndices, GL_UNSIGNED_INT, (void*)0);
@@ -2456,7 +2576,7 @@ void URender()
 	glProgramUniform4f(gProgramId, objColLoc, 0.17f, 0.9f, 0.0f, 0.0f);
 
 	// We set the texture as texture unit 0
-	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
+	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 
 	// Draws the triangles
@@ -2484,7 +2604,7 @@ void URender()
 	glProgramUniform4f(gProgramId, objColLoc, 0.17f, 0.9f, 0.0f, 0.0f);
 
 	// We set the texture as texture unit 0
-	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
+	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 
 	// Draws the triangles
@@ -2512,10 +2632,7 @@ void URender()
 	glProgramUniform4f(gProgramId, objColLoc, 0.75f, 0.0f, 0.5f, 0.0f);
 
 	// We set the texture as texture unit 0
-	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, gTextureIdWood);
+	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 	// Draws the triangles
 	glDrawElements(GL_TRIANGLES, meshes.gBoxMesh.nIndices, GL_UNSIGNED_INT, (void*)0);
@@ -2540,10 +2657,7 @@ void URender()
 	glProgramUniform4f(gProgramId, objColLoc, 0.75f, 0.0f, 0.5f, 0.0f);
 
 	// We set the texture as texture unit 0
-	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, gTextureIdWood);
+	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 	// Draws the triangles
 	glDrawElements(GL_TRIANGLES, meshes.gBoxMesh.nIndices, GL_UNSIGNED_INT, (void*)0);
@@ -2568,10 +2682,7 @@ void URender()
 	glProgramUniform4f(gProgramId, objColLoc, 0.75f, 0.0f, 0.5f, 0.0f);
 
 	// We set the texture as texture unit 0
-	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, gTextureIdWood);
+	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 	// Draws the triangles
 	glDrawElements(GL_TRIANGLES, meshes.gBoxMesh.nIndices, GL_UNSIGNED_INT, (void*)0);
@@ -2596,10 +2707,7 @@ void URender()
 	glProgramUniform4f(gProgramId, objColLoc, 0.75f, 0.0f, 0.5f, 0.0f);
 
 	// We set the texture as texture unit 0
-	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, gTextureIdWood);
+	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 	// Draws the triangles
 	glDrawElements(GL_TRIANGLES, meshes.gBoxMesh.nIndices, GL_UNSIGNED_INT, (void*)0);
@@ -2624,8 +2732,7 @@ void URender()
 	glProgramUniform4f(gProgramId, objColLoc, 0.17f, 0.9f, 0.0f, 0.0f);
 
 	// We set the texture as texture unit 0
-	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
-
+	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 	// Draws the triangles
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 36);		//bottom
@@ -2652,7 +2759,7 @@ void URender()
 	glProgramUniform4f(gProgramId, objColLoc, 0.17f, 0.9f, 0.0f, 0.0f);
 
 	// We set the texture as texture unit 0
-	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
+	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 
 	// Draws the triangles
@@ -2680,10 +2787,7 @@ void URender()
 	glProgramUniform4f(gProgramId, objColLoc, 0.75f, 0.0f, 0.5f, 0.0f);
 
 	// We set the texture as texture unit 0
-	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, gTextureIdWood);
+	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 	// Draws the triangles
 	glDrawElements(GL_TRIANGLES, meshes.gBoxMesh.nIndices, GL_UNSIGNED_INT, (void*)0);
@@ -2708,149 +2812,13 @@ void URender()
 	glProgramUniform4f(gProgramId, objColLoc, 0.75f, 0.0f, 0.5f, 0.0f);
 
 	// We set the texture as texture unit 0
-	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, gTextureIdWood);
+	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 	// Draws the triangles
 	glDrawElements(GL_TRIANGLES, meshes.gBoxMesh.nIndices, GL_UNSIGNED_INT, (void*)0);
 
 	// Deactivate the Vertex Array Object
 	glBindVertexArray(0);
-
-
-
-	/*
-
-	//------------------------------------------------------------------------------------------------------------------
-
-	//SPEAKER BAR MODEL GROUP
-
-	//------------------------------------------------------------------------------------------------------------------
-
-	//SPEAKER BODY
-	// Activate the VBOs contained within the mesh's VAO
-	glBindVertexArray(meshes.gBoxMesh.vao);
-
-	// 1. Scales the object
-	scale = glm::scale(glm::vec3(6.0f, 1.0f, 1.0f));
-	// 2. Rotate the object
-	rotation = glm::rotate(0.785398f, glm::vec3(0.0, 1.0f, 0.0f));
-	// 3. Position the object
-	translation = glm::translate(glm::vec3(-5.0f, 0.5f, -3.0f));
-	// Model matrix: transformations are applied right-to-left order
-	model = translation * rotation * scale;
-	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-
-	glProgramUniform4f(gProgramId, objColLoc, 0.17f, 0.7f, 0.8f, 0.0f);
-
-	// We set the texture as texture unit 0
-	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
-
-
-	// Draws the triangles
-	glDrawElements(GL_TRIANGLES, meshes.gBoxMesh.nIndices, GL_UNSIGNED_INT, (void*)0);
-
-	// Deactivate the Vertex Array Object
-	glBindVertexArray(0);
-
-	//SPEAKER PLATE
-	// Activate the VBOs contained within the mesh's VAO
-	glBindVertexArray(meshes.gPlaneMesh.vao);
-
-	// 1. Scales the object
-	scale = glm::scale(glm::vec3(2.95f, 0.45f, 0.45f));
-	// 2. Rotate the object
-	rotation = glm::rotate(glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-	rotation1 = glm::rotate(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-	// 3. Position the object
-	translation = glm::translate(glm::vec3(-4.646f, 0.5f, -2.646f));
-	// Model matrix: transformations are applied right-to-left order
-	model = translation * rotation * rotation1 * scale;
-	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-
-	glProgramUniform4f(gProgramId, objColLoc, 0.5f, 0.5f, 0.5f, 1.0f);
-
-	ubHasTextureVal = true;
-	glUniform1i(uHasTextureLoc, ubHasTextureVal);
-
-	// We set the texture as texture unit 0
-	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 4);
-
-
-	// Draws the triangles
-	glDrawArrays(GL_TRIANGLES, 0, meshes.gPlaneMesh.nVertices);
-
-	// Draws the triangles
-	glDrawElements(GL_TRIANGLES, meshes.gPlaneMesh.nIndices, GL_UNSIGNED_INT, (void*)0);
-
-	// Deactivate the Vertex Array Object
-	glBindVertexArray(0);
-
-	//DIAL PLATE
-	// Activate the VBOs contained within the mesh's VAO
-	glBindVertexArray(meshes.gPlaneMesh.vao);
-
-	// 1. Scales the object
-	scale = glm::scale(glm::vec3(0.5f, 1.0f, 0.5f));
-	// 2. Rotate the object
-	rotation = glm::rotate(glm::radians(45.0f), glm::vec3(0.0, 1.0f, 0.0f));
-	// 3. Position the object
-	translation = glm::translate(glm::vec3(-5.0f, 1.01f, -3.0f));
-	// Model matrix: transformations are applied right-to-left order
-	model = translation * rotation * scale;
-	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-
-	glProgramUniform4f(gProgramId, objColLoc, 0.5f, 0.5f, 0.5f, 1.0f);
-
-	ubHasTextureVal = true;
-	glUniform1i(uHasTextureLoc, ubHasTextureVal);
-
-	// We set the texture as texture unit 0
-	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
-
-
-
-	// Draws the triangles
-	glDrawArrays(GL_TRIANGLES, 0, meshes.gPlaneMesh.nVertices);
-
-	// Draws the triangles
-	glDrawElements(GL_TRIANGLES, meshes.gPlaneMesh.nIndices, GL_UNSIGNED_INT, (void*)0);
-
-	// Deactivate the Vertex Array Object
-	glBindVertexArray(0);
-
-	//KNOB
-	// Activate the VBOs contained within the mesh's VAO
-	glBindVertexArray(meshes.gCylinderMesh.vao);
-
-	// 1. Scales the object
-	scale = glm::scale(glm::vec3(0.3f, 0.10f, 0.3f));
-	// 2. Rotate the object
-	rotation = glm::rotate(0.0f, glm::vec3(1.0, 1.0f, 1.0f));
-	// 3. Position the object
-	translation = glm::translate(glm::vec3(-5.0f, 1.01f, -3.0f));
-	// Model matrix: transformations are applied right-to-left order
-	model = translation * rotation * scale;
-	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-
-	glProgramUniform4f(gProgramId, objColLoc, 0.17f, 0.9f, 0.0f, 0.0f);
-
-	// We set the texture as texture unit 0
-	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
-
-
-
-	// Draws the triangles
-	glDrawArrays(GL_TRIANGLE_FAN, 0, 36);		//bottom
-	glDrawArrays(GL_TRIANGLE_FAN, 36, 36);		//top
-	glDrawArrays(GL_TRIANGLE_STRIP, 72, 146);	//sides
-
-	// Deactivate the Vertex Array Object
-	glBindVertexArray(0);
-
-	*/
 
 	//------------------------------------------------------------------------------------------------------------------
 
@@ -2901,7 +2869,7 @@ void URender()
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
 	// We set the texture as texture unit 0
-	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
+	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 4);
 
 	// Draws the triangles
 	glDrawArrays(GL_TRIANGLES, 0, meshes.gPlaneMesh.nVertices);
@@ -2912,36 +2880,7 @@ void URender()
 	// Deactivate the Vertex Array Object
 	glBindVertexArray(0);
 
-	//KEYS
-	// Activate the VBOs contained within the mesh's VAO
-	glBindVertexArray(meshes.gPlaneMesh.vao);
 
-	// 1. Scales the object
-	scale = glm::scale(glm::vec3(3.0f, 2.0f, 1.0f));
-	// 2. Rotate the object
-	rotation = glm::rotate(0.0f, glm::vec3(1.0, 1.0f, 1.0f));
-	// 3. Position the object
-	translation = glm::translate(glm::vec3(-6.0f, 0.002f, 2.0f));
-	// Model matrix: transformations are applied right-to-left order
-	model = translation * rotation * scale;
-	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-
-	glProgramUniform4f(gProgramId, objColLoc, 0.5f, 0.5f, 0.5f, 1.0f);
-
-	ubHasTextureVal = true;
-	glUniform1i(uHasTextureLoc, ubHasTextureVal);
-
-	// We set the texture as texture unit 0
-	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 5);
-
-	// Draws the triangles
-	glDrawArrays(GL_TRIANGLES, 0, meshes.gPlaneMesh.nVertices);
-
-	// Draws the triangles
-	glDrawElements(GL_TRIANGLES, meshes.gPlaneMesh.nIndices, GL_UNSIGNED_INT, (void*)0);
-
-	// Deactivate the Vertex Array Object
-	glBindVertexArray(0);
 
 	//KEYBOARD WRIST REST BODY
 	// Activate the VBOs contained within the mesh's VAO
@@ -2960,7 +2899,7 @@ void URender()
 	glProgramUniform4f(gProgramId, objColLoc, 0.17f, 0.7f, 0.8f, 0.0f);
 
 	// We set the texture as texture unit 0
-	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 4);
+	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 10);
 
 	// Draws the triangles
 	glDrawElements(GL_TRIANGLES, meshes.gBoxMesh.nIndices, GL_UNSIGNED_INT, (void*)0);
@@ -2988,7 +2927,7 @@ void URender()
 	glProgramUniform4f(gProgramId, objColLoc, 0.0f, 1.0f, 0.0f, 1.0f);
 
 	// We set the texture as texture unit 0
-	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
+	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 10);
 
 	// Draws the triangles
 	glDrawElements(GL_TRIANGLES, meshes.gSphereMesh.nIndices, GL_UNSIGNED_INT, (void*)0);
@@ -3038,7 +2977,7 @@ void URender()
 	glProgramUniform4f(gProgramId, objColLoc, 0.17f, 0.7f, 0.8f, 0.0f);
 
 	// We set the texture as texture unit 0
-	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 4);
+	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 11);
 
 	// Draws the triangles
 	glDrawElements(GL_TRIANGLES, meshes.gBoxMesh.nIndices, GL_UNSIGNED_INT, (void*)0);

@@ -11,6 +11,8 @@ Class: CS330, CS499
 #include <GLFW/glfw3.h>     // GLFW library
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>      // Image loading Utility functions
+#include <string>
+
 
 // GLM Math Header inclusions
 #include <glm/glm.hpp>
@@ -37,7 +39,7 @@ namespace
 	const int WINDOW_HEIGHT = 1080;
 
 	// Variable for multisapmle multiplier
-	unsigned int samples = 16;
+	unsigned int samples = 16; // recommeded settings 0, 2, 4, 8, 16 
 
 	// Stores the GL data relative to a given mesh
 	struct GLMesh
@@ -80,6 +82,7 @@ namespace
 	// timing
 	float gDeltaTime = 0.0f; // time between current frame and last frame
 	float gLastFrame = 0.0f;
+	unsigned int counter = 0;
 
 	//PI
 	const double M_PI = 3.14159265358979323846f;
@@ -393,7 +396,17 @@ int main(int argc, char* argv[])
 		// --------------------
 		float currentFrame = glfwGetTime();
 		gDeltaTime = currentFrame - gLastFrame;
-		gLastFrame = currentFrame;
+		counter++;
+		
+		if (gDeltaTime >= 1.0 / 30.0) {
+			std::string FPS = std::to_string((1.0 / gDeltaTime) * counter); //Stores the FPS value as a string
+			std::string ms = std::to_string((gDeltaTime / counter) * 1000);
+			std::string newTitle = "CS499 Enhancement 1 & 2 by Cole Doty- " + FPS +"DPS / " + ms + "ms";
+			glfwSetWindowTitle(gWindow, newTitle.c_str());
+			gLastFrame = currentFrame;
+			counter = 0;
+		}
+
 
 		// input
 		// -----
@@ -759,7 +772,7 @@ void URender()
 	ubHasTextureVal = true;
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 5);
 
 	// Draws the triangles
@@ -789,7 +802,7 @@ void URender()
 
 	glProgramUniform4f(gProgramId, objColLoc, 0.17f, 0.9f, 0.0f, 0.0f);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
 
 	// Draws the triangles
@@ -816,7 +829,7 @@ void URender()
 
 	glProgramUniform4f(gProgramId, objColLoc, 0.0f, 1.0f, 0.0f, 1.0f);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 6);
 
 	// Draws the triangles
@@ -850,7 +863,7 @@ void URender()
 	ubHasTextureVal = true;
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
 
 	// Draws the triangles
@@ -878,7 +891,7 @@ void URender()
 	ubHasTextureVal = true;
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
 
 	// Draws the triangles
@@ -906,7 +919,7 @@ void URender()
 	ubHasTextureVal = true;
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
 
 	// Draws the triangles
@@ -934,7 +947,7 @@ void URender()
 	ubHasTextureVal = true;
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
 
 	// Draws the triangles
@@ -962,7 +975,7 @@ void URender()
 	ubHasTextureVal = true;
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
 
 
@@ -991,7 +1004,7 @@ void URender()
 	ubHasTextureVal = true;
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
 
 
@@ -1020,7 +1033,7 @@ void URender()
 	ubHasTextureVal = true;
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
 
 
@@ -1049,7 +1062,7 @@ void URender()
 	ubHasTextureVal = true;
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
 
 
@@ -1078,7 +1091,7 @@ void URender()
 	ubHasTextureVal = true;
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
 
 
@@ -1107,7 +1120,7 @@ void URender()
 	ubHasTextureVal = true;
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
 
 
@@ -1136,7 +1149,7 @@ void URender()
 	ubHasTextureVal = true;
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
 
 
@@ -1165,7 +1178,7 @@ void URender()
 	ubHasTextureVal = true;
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
 
 
@@ -1194,7 +1207,7 @@ void URender()
 	ubHasTextureVal = true;
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
 
 
@@ -1225,7 +1238,7 @@ void URender()
 	ubHasTextureVal = true;
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
 
 
@@ -1254,7 +1267,7 @@ void URender()
 	ubHasTextureVal = true;
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
 
 
@@ -1285,7 +1298,7 @@ void URender()
 	ubHasTextureVal = true;
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 2);
 
 
@@ -1314,7 +1327,7 @@ void URender()
 	ubHasTextureVal = true;
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 2);
 
 
@@ -1343,7 +1356,7 @@ void URender()
 	ubHasTextureVal = true;
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 2);
 
 
@@ -1372,7 +1385,7 @@ void URender()
 	ubHasTextureVal = true;
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 2);
 
 
@@ -1400,7 +1413,7 @@ void URender()
 
 	glProgramUniform4f(gProgramId, objColLoc, 0.17f, 0.9f, 0.0f, 0.0f);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 
@@ -1428,7 +1441,7 @@ void URender()
 
 	glProgramUniform4f(gProgramId, objColLoc, 0.17f, 0.9f, 0.0f, 0.0f);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
 
 
@@ -1456,7 +1469,7 @@ void URender()
 
 	glProgramUniform4f(gProgramId, objColLoc, 0.17f, 0.9f, 0.0f, 0.0f);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
 
 
@@ -1484,7 +1497,7 @@ void URender()
 
 	glProgramUniform4f(gProgramId, objColLoc, 0.17f, 0.9f, 0.0f, 0.0f);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 6);
 
 
@@ -1512,7 +1525,7 @@ void URender()
 
 	glProgramUniform4f(gProgramId, objColLoc, 0.0f, 1.0f, 0.0f, 1.0f);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 6);
 
 	// Draws the triangles
@@ -1546,7 +1559,7 @@ void URender()
 	ubHasTextureVal = true;
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 0);
 
 	// Draws the triangles
@@ -1574,7 +1587,7 @@ void URender()
 	ubHasTextureVal = true;
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 0);
 
 	// Draws the triangles
@@ -1604,7 +1617,7 @@ void URender()
 	ubHasTextureVal = true;
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
 
 	// Draws the triangles
@@ -1632,7 +1645,7 @@ void URender()
 	ubHasTextureVal = true;
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
 
 	// Draws the triangles
@@ -1660,7 +1673,7 @@ void URender()
 	ubHasTextureVal = true;
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
 
 	// Draws the triangles
@@ -1688,7 +1701,7 @@ void URender()
 	ubHasTextureVal = true;
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
 
 	// Draws the triangles
@@ -1716,7 +1729,7 @@ void URender()
 	ubHasTextureVal = true;
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
 
 	// Draws the triangles
@@ -1744,7 +1757,7 @@ void URender()
 	ubHasTextureVal = true;
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
 
 	// Draws the triangles
@@ -1772,7 +1785,7 @@ void URender()
 	ubHasTextureVal = true;
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
 
 	// Draws the triangles
@@ -1800,7 +1813,7 @@ void URender()
 	ubHasTextureVal = true;
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
 
 	// Draws the triangles
@@ -1828,7 +1841,7 @@ void URender()
 	ubHasTextureVal = true;
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
 
 	// Draws the triangles
@@ -1856,7 +1869,7 @@ void URender()
 	ubHasTextureVal = true;
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
 
 	// Draws the triangles
@@ -1884,7 +1897,7 @@ void URender()
 	ubHasTextureVal = true;
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
 
 	// Draws the triangles
@@ -1912,7 +1925,7 @@ void URender()
 	ubHasTextureVal = true;
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
 
 	// Draws the triangles
@@ -1940,7 +1953,7 @@ void URender()
 	ubHasTextureVal = true;
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
 
 	// Draws the triangles
@@ -1968,7 +1981,7 @@ void URender()
 	ubHasTextureVal = true;
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
 
 	// Draws the triangles
@@ -1996,7 +2009,7 @@ void URender()
 	ubHasTextureVal = true;
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
 
 
@@ -2025,7 +2038,7 @@ void URender()
 	ubHasTextureVal = true;
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
 
 
@@ -2057,7 +2070,7 @@ void URender()
 
 	glProgramUniform4f(gProgramId, objColLoc, 0.17f, 0.7f, 0.8f, 0.0f);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
 
 
@@ -2083,7 +2096,7 @@ void URender()
 
 	glProgramUniform4f(gProgramId, objColLoc, 1.0f, 0.0f, 0.0f, 1.0f);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 7);
 
 
@@ -2110,7 +2123,7 @@ void URender()
 
 	glProgramUniform4f(gProgramId, objColLoc, 0.17f, 0.7f, 0.8f, 0.0f);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
 
 
@@ -2137,7 +2150,7 @@ void URender()
 
 	glProgramUniform4f(gProgramId, objColLoc, 1.0f, 0.0f, 0.0f, 1.0f);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 8);
 
 
@@ -2164,7 +2177,7 @@ void URender()
 
 	glProgramUniform4f(gProgramId, objColLoc, 0.17f, 0.7f, 0.8f, 0.0f);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
 
 
@@ -2191,7 +2204,7 @@ void URender()
 
 	glProgramUniform4f(gProgramId, objColLoc, 1.0f, 0.0f, 0.0f, 1.0f);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 8);
 
 
@@ -2223,7 +2236,7 @@ void URender()
 
 	glProgramUniform4f(gProgramId, objColLoc, 0.17f, 0.9f, 0.0f, 0.0f);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 
@@ -2253,7 +2266,7 @@ void URender()
 
 	glProgramUniform4f(gProgramId, objColLoc, 0.75f, 0.0f, 0.5f, 0.0f);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 	// Draws the triangles
@@ -2278,7 +2291,7 @@ void URender()
 
 	glProgramUniform4f(gProgramId, objColLoc, 0.17f, 0.9f, 0.0f, 0.0f);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 
@@ -2306,7 +2319,7 @@ void URender()
 
 	glProgramUniform4f(gProgramId, objColLoc, 0.75f, 0.0f, 0.5f, 0.0f);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 	// Draws the triangles
@@ -2331,7 +2344,7 @@ void URender()
 
 	glProgramUniform4f(gProgramId, objColLoc, 0.17f, 0.9f, 0.0f, 0.0f);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 
@@ -2359,7 +2372,7 @@ void URender()
 
 	glProgramUniform4f(gProgramId, objColLoc, 0.75f, 0.0f, 0.5f, 0.0f);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 	// Draws the triangles
@@ -2384,7 +2397,7 @@ void URender()
 
 	glProgramUniform4f(gProgramId, objColLoc, 0.17f, 0.9f, 0.0f, 0.0f);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 
@@ -2412,7 +2425,7 @@ void URender()
 
 	glProgramUniform4f(gProgramId, objColLoc, 0.17f, 0.9f, 0.0f, 0.0f);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 
@@ -2440,7 +2453,7 @@ void URender()
 
 	glProgramUniform4f(gProgramId, objColLoc, 0.17f, 0.9f, 0.0f, 0.0f);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 
@@ -2470,7 +2483,7 @@ void URender()
 
 	glProgramUniform4f(gProgramId, objColLoc, 0.75f, 0.0f, 0.5f, 0.0f);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 	// Draws the triangles
@@ -2495,7 +2508,7 @@ void URender()
 
 	glProgramUniform4f(gProgramId, objColLoc, 0.17f, 0.9f, 0.0f, 0.0f);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 
@@ -2523,7 +2536,7 @@ void URender()
 
 	glProgramUniform4f(gProgramId, objColLoc, 0.75f, 0.0f, 0.5f, 0.0f);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 	// Draws the triangles
@@ -2548,7 +2561,7 @@ void URender()
 
 	glProgramUniform4f(gProgramId, objColLoc, 0.75f, 0.0f, 0.5f, 0.0f);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 	// Draws the triangles
@@ -2573,7 +2586,7 @@ void URender()
 
 	glProgramUniform4f(gProgramId, objColLoc, 0.75f, 0.0f, 0.5f, 0.0f);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 	// Draws the triangles
@@ -2598,7 +2611,7 @@ void URender()
 
 	glProgramUniform4f(gProgramId, objColLoc, 0.17f, 0.9f, 0.0f, 0.0f);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 
@@ -2626,7 +2639,7 @@ void URender()
 
 	glProgramUniform4f(gProgramId, objColLoc, 0.17f, 0.9f, 0.0f, 0.0f);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 
@@ -2654,7 +2667,7 @@ void URender()
 
 	glProgramUniform4f(gProgramId, objColLoc, 0.75f, 0.0f, 0.5f, 0.0f);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 	// Draws the triangles
@@ -2679,7 +2692,7 @@ void URender()
 
 	glProgramUniform4f(gProgramId, objColLoc, 0.75f, 0.0f, 0.5f, 0.0f);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 	// Draws the triangles
@@ -2704,7 +2717,7 @@ void URender()
 
 	glProgramUniform4f(gProgramId, objColLoc, 0.75f, 0.0f, 0.5f, 0.0f);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 	// Draws the triangles
@@ -2729,7 +2742,7 @@ void URender()
 
 	glProgramUniform4f(gProgramId, objColLoc, 0.75f, 0.0f, 0.5f, 0.0f);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 	// Draws the triangles
@@ -2754,7 +2767,7 @@ void URender()
 
 	glProgramUniform4f(gProgramId, objColLoc, 0.17f, 0.9f, 0.0f, 0.0f);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 	// Draws the triangles
@@ -2781,7 +2794,7 @@ void URender()
 
 	glProgramUniform4f(gProgramId, objColLoc, 0.17f, 0.9f, 0.0f, 0.0f);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 
@@ -2809,7 +2822,7 @@ void URender()
 
 	glProgramUniform4f(gProgramId, objColLoc, 0.75f, 0.0f, 0.5f, 0.0f);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 	// Draws the triangles
@@ -2834,7 +2847,7 @@ void URender()
 
 	glProgramUniform4f(gProgramId, objColLoc, 0.75f, 0.0f, 0.5f, 0.0f);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 	// Draws the triangles
@@ -2865,7 +2878,7 @@ void URender()
 
 	glProgramUniform4f(gProgramId, objColLoc, 0.17f, 0.7f, 0.8f, 0.0f);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
 
 
@@ -2891,7 +2904,7 @@ void URender()
 	ubHasTextureVal = true;
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 4);
 
 	// Draws the triangles
@@ -2919,7 +2932,7 @@ void URender()
 
 	glProgramUniform4f(gProgramId, objColLoc, 0.17f, 0.7f, 0.8f, 0.0f);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 10);
 
 	// Draws the triangles
@@ -2947,7 +2960,7 @@ void URender()
 
 	glProgramUniform4f(gProgramId, objColLoc, 0.0f, 1.0f, 0.0f, 1.0f);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 10);
 
 	// Draws the triangles
@@ -2972,7 +2985,7 @@ void URender()
 
 	glProgramUniform4f(gProgramId, objColLoc, 0.0f, 0.0f, 1.0f, 1.0f);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 3);
 
 	// Draws the triangles
@@ -2997,7 +3010,7 @@ void URender()
 
 	glProgramUniform4f(gProgramId, objColLoc, 0.17f, 0.7f, 0.8f, 0.0f);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 11);
 
 	// Draws the triangles
@@ -3029,7 +3042,7 @@ void URender()
 	ubHasTextureVal = true;
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
-	// We set the texture as texture unit 0
+	// We set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 1);
 
 	// Draws the triangles

@@ -1,3 +1,10 @@
+/*
+Name: Cole Doty
+Date: 4/2/2024
+Version:2.1
+Class: CS330, CS499
+*/
+
 #include <iostream>         // cout, cerr
 #include <cstdlib>          // EXIT_FAILURE
 #include <GL/glew.h>        // GLEW library
@@ -29,6 +36,7 @@ namespace
 	const int WINDOW_WIDTH = 1920;
 	const int WINDOW_HEIGHT = 1080;
 
+	// Variable for multisapmle multiplier
 	unsigned int samples = 16;
 
 	// Stores the GL data relative to a given mesh
@@ -130,14 +138,14 @@ const GLchar* vertexShaderSource = GLSL(440,
 const GLchar* fragmentShaderSource = GLSL(440,
 	in vec3 vertexFragmentNormal; // For incoming normals
 	in vec3 vertexFragmentPos; // For incoming fragment position
-	in vec2 vertexTextureCoordinate;
+	in vec2 vertexTextureCoordinate; // For incoming texture coordinate
 
 	out vec4 fragmentColor; // For outgoing cube color to the GPU
 
-	uniform vec4 objectColor;
+	uniform vec4 objectColor; // Set lighting color
 	uniform vec3 ambientColor;
 	uniform vec3 light1Color;
-	uniform vec3 light1Position;
+	uniform vec3 light1Position; // Set lighting position
 	uniform vec3 light2Color;
 	uniform vec3 light2Position;
 	uniform vec3 light3Color;
@@ -145,12 +153,12 @@ const GLchar* fragmentShaderSource = GLSL(440,
 	uniform vec3 viewPosition;
 	uniform sampler2D uTexture; // Useful when working with multiple textures
 	uniform bool ubHasTexture;
-	uniform float light1Strength = 0.1f; // Set ambient or global lighting strength
-	uniform float light2Strength = 0.1f; // Set lighting strength
-	uniform float light3Strength = 0.1f; // Set lighting strength
-	uniform float ambientStrength = 0.1f; // Set lighting strength
-	uniform float specularIntensity1 = 0.8f;
-	uniform float highlightSize1 = 16.0f;
+	uniform float light1Strength = 0.1f; // Set lighting strength
+	uniform float light2Strength = 0.1f;
+	uniform float light3Strength = 0.1f; 
+	uniform float ambientStrength = 0.1f; 
+	uniform float specularIntensity1 = 0.8f; // Set reflection intensity 
+	uniform float highlightSize1 = 16.0f; // Set reflection size 
 	uniform float specularIntensity2 = 0.8f;
 	uniform float highlightSize2 = 16.0f;
 	uniform float specularIntensity3 = 0.8f;
@@ -167,19 +175,19 @@ const GLchar* fragmentShaderSource = GLSL(440,
 		vec3 norm = normalize(vertexFragmentNormal); // Normalize vectors to 1 unit
 		vec3 light1Direction = normalize(light1Position - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
 		float impact1 = max(dot(norm, light1Direction), 0.0);// Calculate diffuse impact by generating dot product of normal and light
-		vec3 diffuse1 = light1Strength * impact1 * light1Color; // Generate diffuse light color
-		vec3 light2Direction = normalize(light2Position - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
-		float impact2 = max(dot(norm, light2Direction), 0.0);// Calculate diffuse impact by generating dot product of normal and light
-		vec3 diffuse2 = light2Strength * impact2 * light2Color; // Generate diffuse light color
-		vec3 light3Direction = normalize(light3Position - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
-		float impact3 = max(dot(norm, light3Direction), 0.0);// Calculate diffuse impact by generating dot product of normal and light
-		vec3 diffuse3 = light3Strength * impact3 * light3Color; // Generate diffuse light color
+		vec3 diffuse1 = light1Strength * impact1 * light1Color; 
+		vec3 light2Direction = normalize(light2Position - vertexFragmentPos); 
+		float impact2 = max(dot(norm, light2Direction), 0.0);
+		vec3 diffuse2 = light2Strength * impact2 * light2Color; 
+		vec3 light3Direction = normalize(light3Position - vertexFragmentPos); 
+		float impact3 = max(dot(norm, light3Direction), 0.0);
+		vec3 diffuse3 = light3Strength * impact3 * light3Color; 
 
 		//**Calculate Specular lighting**
 		vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
 		vec3 reflectDir1 = reflect(-light1Direction, norm);// Calculate reflection vector
-		vec3 reflectDir2 = reflect(-light2Direction, norm);// Calculate reflection vector
-		vec3 reflectDir3 = reflect(-light3Direction, norm);// Calculate reflection vector
+		vec3 reflectDir2 = reflect(-light2Direction, norm);
+		vec3 reflectDir3 = reflect(-light3Direction, norm);
 		//Calculate specular component
 		float specularComponent1 = pow(max(dot(viewDir, reflectDir1), 0.0), highlightSize1);
 		vec3 specular1 = specularIntensity1 * specularComponent1 * light1Color;
@@ -431,7 +439,7 @@ bool UInitialize(int argc, char* argv[], GLFWwindow** window)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	glfwWindowHint(GLFW_SAMPLES, samples);
+	glfwWindowHint(GLFW_SAMPLES, samples); //Initializes multisampling to the value of samples (MSAA x16)
 
 #ifdef __APPLE__
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
@@ -617,6 +625,7 @@ void URender()
 	// Enable z-depth
 	glEnable(GL_DEPTH_TEST);
 
+	// Enable multisample
 	glEnable(GL_MULTISAMPLE);
 
 	// Clear the frame and z buffers
@@ -676,7 +685,7 @@ void URender()
 	glUniform3f(ambColLoc, 0.2f, 0.2f, 0.2f);
 	glUniform3f(light1ColLoc, 0.6f, 0.4f, 0.2f);
 	glUniform3f(light1PosLoc, 30.0f, 16.0f, -10.0f);
-	glUniform1f(light1StrLoc, 0.5f); //lighting strength set to 10%
+	glUniform1f(light1StrLoc, 0.5f); //lighting strength set to 50%
 	glUniform3f(light2ColLoc, 0.2f, 0.2f, 0.2f);
 	glUniform3f(light2PosLoc, 0.0f, 33.0f, 20.0f);
 	glUniform1f(light2StrLoc, 1.0f); //lighting strength set to 100%
@@ -720,7 +729,7 @@ void URender()
 	ubHasTextureVal = true;
 	glUniform1i(uHasTextureLoc, ubHasTextureVal);
 
-	// We set the texture as texture unit 0
+	// Set the texture as texture unit
 	glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 6);
 
 	// Draws the triangles
@@ -728,6 +737,8 @@ void URender()
 
 	// Deactivate the Vertex Array Object
 	glBindVertexArray(0);
+
+	//------------------------------------------------------------------------------------------------------------------
 
 	//FLOOR
 	// Activate the VBOs contained within the mesh's VAO
@@ -759,6 +770,8 @@ void URender()
 
 	// Deactivate the Vertex Array Object
 	glBindVertexArray(0);
+
+	//------------------------------------------------------------------------------------------------------------------
 
 	//OVERHEAD LAMP BASE
 	// Activate the VBOs contained within the mesh's VAO
@@ -1191,6 +1204,8 @@ void URender()
 	// Deactivate the Vertex Array Object
 	glBindVertexArray(0);
 
+	//------------------------------------------------------------------------------------------------------------------
+
 	//Lamp Shelf Lower
 	// Activate the VBOs contained within the mesh's VAO
 	glBindVertexArray(meshes.gBoxMesh.vao);
@@ -1248,6 +1263,8 @@ void URender()
 
 	// Deactivate the Vertex Array Object
 	glBindVertexArray(0);
+
+	//------------------------------------------------------------------------------------------------------------------
 
 	//Lamp Shade Front
 	// Activate the VBOs contained within the mesh's VAO
@@ -1364,6 +1381,8 @@ void URender()
 
 	// Deactivate the Vertex Array Object
 	glBindVertexArray(0);
+
+	//------------------------------------------------------------------------------------------------------------------
 
 	//Light Bulb Socket
 	// Activate the VBOs contained within the mesh's VAO
@@ -1564,6 +1583,8 @@ void URender()
 	// Deactivate the Vertex Array Object
 	glBindVertexArray(0);
 
+	//------------------------------------------------------------------------------------------------------------------
+
 	//Leg - Back Left
 	// Activate the VBOs contained within the mesh's VAO
 	glBindVertexArray(meshes.gBoxMesh.vao);
@@ -1592,7 +1613,6 @@ void URender()
 	// Deactivate the Vertex Array Object
 	glBindVertexArray(0);
 
-	//LEGS
 	//Leg  - Back Right
 	// Activate the VBOs contained within the mesh's VAO
 	glBindVertexArray(meshes.gBoxMesh.vao);
@@ -1733,7 +1753,6 @@ void URender()
 	// Deactivate the Vertex Array Object
 	glBindVertexArray(0);
 
-	//LEG SUPPORT BEAMS
 	//Leg Support Beam - High Left
 	// Activate the VBOs contained within the mesh's VAO
 	glBindVertexArray(meshes.gBoxMesh.vao);
@@ -2216,6 +2235,8 @@ void URender()
 	// Deactivate the Vertex Array Object
 	glBindVertexArray(0);
 
+	//------------------------------------------------------------------------------------------------------------------
+
 	//CLAMP TOP 1
 	// Activate the VBOs contained within the mesh's VAO
 	glBindVertexArray(meshes.gBoxMesh.vao);
@@ -2430,6 +2451,8 @@ void URender()
 
 	// Deactivate the Vertex Array Object
 	glBindVertexArray(0);
+
+	//------------------------------------------------------------------------------------------------------------------
 
 	//SCREEN MOUNT MID 1
 	// Activate the VBOs contained within the mesh's VAO
@@ -2879,8 +2902,6 @@ void URender()
 
 	// Deactivate the Vertex Array Object
 	glBindVertexArray(0);
-
-
 
 	//KEYBOARD WRIST REST BODY
 	// Activate the VBOs contained within the mesh's VAO

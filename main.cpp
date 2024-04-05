@@ -1,7 +1,7 @@
 /*
 Name: Cole Doty
-Date: 4/2/2024
-Version:2.1
+Date: 4/4/2024
+Version:2.2
 Class: CS330, CS499
 */
 
@@ -38,8 +38,8 @@ namespace
 	const int WINDOW_WIDTH = 1920;
 	const int WINDOW_HEIGHT = 1080;
 
-	// Variable for multisapmle multiplier
-	unsigned int samples = 16; // recommeded settings 0, 2, 4, 8, 16 
+	// Variable for multisample multiplier
+	unsigned int samples = 16; // recommended settings 0, 2, 4, 8, 16 
 
 	// Stores the GL data relative to a given mesh
 	struct GLMesh
@@ -95,7 +95,7 @@ namespace
  * redraw graphics on the window when resized,
  * and render graphics on the screen
  */
-bool UInitialize(int, char*[], GLFWwindow** window);
+bool UInitialize(int, char* [], GLFWwindow** window);
 void UResizeWindow(GLFWwindow* window, int width, int height);
 void UProcessInput(GLFWwindow* window);
 void UMousePositionCallback(GLFWwindow* window, double xpos, double ypos);
@@ -104,7 +104,7 @@ void UMouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 bool UCreateTexture(const char* filename, GLuint& textureId);
 void UDestroyTexture(GLuint textureId);
 void URender();
-bool UCreateShaderProgram(const char* vtxShaderSource, const char* fragShaderSource, GLuint &programId);
+bool UCreateShaderProgram(const char* vtxShaderSource, const char* fragShaderSource, GLuint& programId);
 void UDestroyShaderProgram(GLuint programId);
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -112,127 +112,129 @@ void UDestroyShaderProgram(GLuint programId);
 /* Vertex Shader Source Code*/
 const GLchar* vertexShaderSource = GLSL(440,
 	layout(location = 0) in vec3 vertexPosition; // VAP position 0 for vertex position data
-	layout(location = 1) in vec3 vertexNormal; // VAP position 1 for normals
-	layout(location = 2) in vec2 textureCoordinate;
+layout(location = 1) in vec3 vertexNormal; // VAP position 1 for normals
+layout(location = 2) in vec2 textureCoordinate;
 
-	out vec3 vertexFragmentNormal; // For outgoing normals to fragment shader
-	out vec3 vertexFragmentPos; // For outgoing color / pixels to fragment shader
-	out vec2 vertexTextureCoordinate;
+out vec3 vertexFragmentNormal; // For outgoing normals to fragment shader
+out vec3 vertexFragmentPos; // For outgoing color / pixels to fragment shader
+out vec2 vertexTextureCoordinate;
 
-	//Uniform / Global variables for the  transform matrices
-	uniform mat4 model;
-	uniform mat4 view;
-	uniform mat4 projection;
+//Uniform / Global variables for the  transform matrices
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
 
-	void main()
-	{
-		gl_Position = projection * view * model * vec4(vertexPosition, 1.0f); // Transforms vertices into clip coordinates
+void main()
+{
+	gl_Position = projection * view * model * vec4(vertexPosition, 1.0f); // Transforms vertices into clip coordinates
 
-		vertexFragmentPos = vec3(model * vec4(vertexPosition, 1.0f)); // Gets fragment / pixel position in world space only (exclude view and projection)
+	vertexFragmentPos = vec3(model * vec4(vertexPosition, 1.0f)); // Gets fragment / pixel position in world space only (exclude view and projection)
 
-		vertexFragmentNormal = mat3(transpose(inverse(model))) * vertexNormal; // get normal vectors in world space only and exclude normal translation properties
+	vertexFragmentNormal = mat3(transpose(inverse(model))) * vertexNormal; // get normal vectors in world space only and exclude normal translation properties
 
-		vertexTextureCoordinate = textureCoordinate;
-	}
+	vertexTextureCoordinate = textureCoordinate;
+}
 );
 
 
 /* Fragment Shader Source Code*/
 const GLchar* fragmentShaderSource = GLSL(440,
 	in vec3 vertexFragmentNormal; // For incoming normals
-	in vec3 vertexFragmentPos; // For incoming fragment position
-	in vec2 vertexTextureCoordinate; // For incoming texture coordinate
+in vec3 vertexFragmentPos; // For incoming fragment position
+in vec2 vertexTextureCoordinate; // For incoming texture coordinate
 
-	out vec4 fragmentColor; // For outgoing cube color to the GPU
+out vec4 fragmentColor; // For outgoing cube color to the GPU
 
-	uniform vec4 objectColor; // Set lighting color
-	uniform vec3 ambientColor;
-	uniform vec3 light1Color;
-	uniform vec3 light1Position; // Set lighting position
-	uniform vec3 light2Color;
-	uniform vec3 light2Position;
-	uniform vec3 light3Color;
-	uniform vec3 light3Position;
-	uniform vec3 viewPosition;
-	uniform sampler2D uTexture; // Useful when working with multiple textures
-	uniform bool ubHasTexture;
-	uniform float light1Strength = 0.1f; // Set lighting strength
-	uniform float light2Strength = 0.1f;
-	uniform float light3Strength = 0.1f; 
-	uniform float ambientStrength = 0.1f; 
-	uniform float specularIntensity1 = 0.8f; // Set reflection intensity 
-	uniform float highlightSize1 = 16.0f; // Set reflection size 
-	uniform float specularIntensity2 = 0.8f;
-	uniform float highlightSize2 = 16.0f;
-	uniform float specularIntensity3 = 0.8f;
-	uniform float highlightSize3 = 16.0f;
+uniform vec4 objectColor; // Set lighting color
+uniform vec3 ambientColor;
+uniform vec3 light1Color;
+uniform vec3 light1Position; // Set lighting position
+uniform vec3 light2Color;
+uniform vec3 light2Position;
+uniform vec3 light3Color;
+uniform vec3 light3Position;
+uniform vec3 viewPosition;
+uniform sampler2D uTexture; // Useful when working with multiple textures
+uniform bool ubHasTexture;
+uniform float light1Strength = 0.1f; // Set lighting strength
+uniform float light2Strength = 0.1f;
+uniform float light3Strength = 0.1f;
+uniform float ambientStrength = 0.1f;
+uniform float specularIntensity1 = 0.8f; // Set reflection intensity 
+uniform float highlightSize1 = 16.0f; // Set reflection size 
+uniform float specularIntensity2 = 0.8f;
+uniform float highlightSize2 = 16.0f;
+uniform float specularIntensity3 = 0.8f;
+uniform float highlightSize3 = 16.0f;
 
-	void main()
+void main()
+{
+	/*Phong lighting model calculations to generate ambient, diffuse, and specular components*/
+
+	//Calculate Ambient lighting
+	vec3 ambient = ambientStrength * ambientColor; // Generate ambient light color
+
+	//**Calculate Diffuse lighting**
+	vec3 norm = normalize(vertexFragmentNormal); // Normalize vectors to 1 unit
+	vec3 light1Direction = normalize(light1Position - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
+	float impact1 = max(dot(norm, light1Direction), 0.0);// Calculate diffuse impact by generating dot product of normal and light
+	vec3 diffuse1 = light1Strength * impact1 * light1Color;
+	vec3 light2Direction = normalize(light2Position - vertexFragmentPos);
+	float impact2 = max(dot(norm, light2Direction), 0.0);
+	vec3 diffuse2 = light2Strength * impact2 * light2Color;
+	vec3 light3Direction = normalize(light3Position - vertexFragmentPos);
+	float impact3 = max(dot(norm, light3Direction), 0.0);
+	vec3 diffuse3 = light3Strength * impact3 * light3Color;
+
+	//**Calculate Specular lighting**
+	vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
+	vec3 reflectDir1 = reflect(-light1Direction, norm);// Calculate reflection vector
+	vec3 reflectDir2 = reflect(-light2Direction, norm);
+	vec3 reflectDir3 = reflect(-light3Direction, norm);
+	//Calculate specular component
+	float specularComponent1 = pow(max(dot(viewDir, reflectDir1), 0.0), highlightSize1);
+	vec3 specular1 = specularIntensity1 * specularComponent1 * light1Color;
+	float specularComponent2 = pow(max(dot(viewDir, reflectDir2), 0.0), highlightSize2);
+	vec3 specular2 = specularIntensity2 * specularComponent2 * light2Color;
+	float specularComponent3 = pow(max(dot(viewDir, reflectDir3), 0.0), highlightSize3);
+	vec3 specular3 = specularIntensity3 * specularComponent3 * light2Color;
+
+	//**Calculate phong result**
+	//Texture holds the color to be used for all three components
+	vec4 textureColor = texture(uTexture, vertexTextureCoordinate);
+	vec3 phong1;
+	vec3 phong2;
+	vec3 phong3;
+
+	if (ubHasTexture == true)
 	{
-		/*Phong lighting model calculations to generate ambient, diffuse, and specular components*/
-
-		//Calculate Ambient lighting
-		vec3 ambient = ambientStrength * ambientColor; // Generate ambient light color
-
-		//**Calculate Diffuse lighting**
-		vec3 norm = normalize(vertexFragmentNormal); // Normalize vectors to 1 unit
-		vec3 light1Direction = normalize(light1Position - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
-		float impact1 = max(dot(norm, light1Direction), 0.0);// Calculate diffuse impact by generating dot product of normal and light
-		vec3 diffuse1 = light1Strength * impact1 * light1Color; 
-		vec3 light2Direction = normalize(light2Position - vertexFragmentPos); 
-		float impact2 = max(dot(norm, light2Direction), 0.0);
-		vec3 diffuse2 = light2Strength * impact2 * light2Color; 
-		vec3 light3Direction = normalize(light3Position - vertexFragmentPos); 
-		float impact3 = max(dot(norm, light3Direction), 0.0);
-		vec3 diffuse3 = light3Strength * impact3 * light3Color; 
-
-		//**Calculate Specular lighting**
-		vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
-		vec3 reflectDir1 = reflect(-light1Direction, norm);// Calculate reflection vector
-		vec3 reflectDir2 = reflect(-light2Direction, norm);
-		vec3 reflectDir3 = reflect(-light3Direction, norm);
-		//Calculate specular component
-		float specularComponent1 = pow(max(dot(viewDir, reflectDir1), 0.0), highlightSize1);
-		vec3 specular1 = specularIntensity1 * specularComponent1 * light1Color;
-		float specularComponent2 = pow(max(dot(viewDir, reflectDir2), 0.0), highlightSize2);
-		vec3 specular2 = specularIntensity2 * specularComponent2 * light2Color;
-		float specularComponent3 = pow(max(dot(viewDir, reflectDir3), 0.0), highlightSize3);
-		vec3 specular3 = specularIntensity3 * specularComponent3 * light2Color;
-
-		//**Calculate phong result**
-		//Texture holds the color to be used for all three components
-		vec4 textureColor = texture(uTexture, vertexTextureCoordinate);
-		vec3 phong1;
-		vec3 phong2;
-		vec3 phong3;
-
-		if (ubHasTexture == true)
-		{
-			phong1 = (ambient + diffuse1 + specular1) * textureColor.xyz;
-			phong2 = (ambient + diffuse2 + specular2) * textureColor.xyz;
-			phong3 = (ambient + diffuse3 + specular3) * textureColor.xyz;
-		}
-		else
-		{
-			phong1 = (ambient + diffuse1 + specular1) * objectColor.xyz;
-			phong2 = (ambient + diffuse2 + specular2) * objectColor.xyz;
-			phong3 = (ambient + diffuse3 + specular3) * objectColor.xyz;
-		}
-
-		fragmentColor = vec4(phong1 + phong2 + phong3, 1.0); // Send lighting results to GPU
+		phong1 = (ambient + diffuse1 + specular1) * textureColor.xyz;
+		phong2 = (ambient + diffuse2 + specular2) * textureColor.xyz;
+		phong3 = (ambient + diffuse3 + specular3) * textureColor.xyz;
 	}
-	);
+	else
+	{
+		phong1 = (ambient + diffuse1 + specular1) * objectColor.xyz;
+		phong2 = (ambient + diffuse2 + specular2) * objectColor.xyz;
+		phong3 = (ambient + diffuse3 + specular3) * objectColor.xyz;
+	}
+
+	fragmentColor = vec4(phong1 + phong2 + phong3, 1.0); // Send lighting results to GPU
+}
+);
 ///////////////////////////////////////////////////////////////////////////////////////
 
 
-// Images are loaded with Y axis going down, but OpenGL's Y axis goes up, so let's flip it
+// A quadratic algorithm that flips texture along the Y axis
 void flipImageVertically(unsigned char* image, int width, int height, int channels)
 {
+	//Flips a texture image before storing it into the programs static memory
 	for (int j = 0; j < height / 2; ++j)
 	{
 		int index1 = j * width * channels;
 		int index2 = (height - 1 - j) * width * channels;
 
+		//cycles the image being flipped
 		for (int i = width * channels; i > 0; --i)
 		{
 			unsigned char tmp = image[index1];
@@ -385,37 +387,42 @@ int main(int argc, char* argv[])
 	glBindTexture(GL_TEXTURE_2D, gTextureIdMousepad);
 
 
-	// Sets the background color of the window to black (it will be implicitely used by glClear)
+	// Sets the background color of the window to black (it will be implicitly used by glClear)
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 	// render loop
 	// -----------
+	// Linear Time O(n) rendering algorithm that will keep recursively looping until the window is closed.
+	// If the window is open it will calculate the perframe timing and FPS of the window.
+	// It will then check for any current key imput commands and render a frame of the scene.
+	// Once the ESC key is presses the window closes and stops the loop.
 	while (!glfwWindowShouldClose(gWindow))
 	{
 		// per-frame timing
 		// --------------------
-		float currentFrame = glfwGetTime();
-		gDeltaTime = currentFrame - gLastFrame;
-		counter++;
-		
+		float currentFrame = glfwGetTime(); //Stores the current frame of the window
+		gDeltaTime = currentFrame - gLastFrame; //Stores the frames change in time
+		counter++; //Increments the counter by 1
+
+		//Refreshes the window title every loop to show an active FPS and ms counter in the window's tital bar
 		if (gDeltaTime >= 1.0 / 30.0) {
 			std::string FPS = std::to_string((1.0 / gDeltaTime) * counter); //Stores the FPS value as a string
-			std::string ms = std::to_string((gDeltaTime / counter) * 1000);
-			std::string newTitle = "CS499 Enhancement 1 & 2 by Cole Doty- " + FPS +"DPS / " + ms + "ms";
-			glfwSetWindowTitle(gWindow, newTitle.c_str());
-			gLastFrame = currentFrame;
-			counter = 0;
+			std::string ms = std::to_string((gDeltaTime / counter) * 1000); //Stores the milliseconds value as a string
+			std::string newTitle = "CS499 Enhancement 1 & 2 by Cole Doty- " + FPS + "DPS / " + ms + "ms"; //Stores the window title with the name and FPS counter
+			glfwSetWindowTitle(gWindow, newTitle.c_str()); //Updates the window title with the name and FPS counter
+			gLastFrame = currentFrame; //Stores the current frame value to be used next loop
+			counter = 0; //Resets the counter for the next loop
 		}
 
 
 		// input
 		// -----
-		UProcessInput(gWindow);
+		UProcessInput(gWindow); //checks for key imput command
 
 		// Render this frame
-		URender();
+		URender(); //Renders each model. The performance cost is proportional to the number of models present in URender.
 
-		glfwPollEvents();
+		glfwPollEvents(); //Process all currently called events in the loop.
 	}
 
 	// Release mesh data
@@ -504,7 +511,7 @@ void UProcessInput(GLFWwindow* window)
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
 
-	//Movment
+	//Movement
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 		gCamera.ProcessKeyboard(FORWARD, gDeltaTime);
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
@@ -518,7 +525,7 @@ void UProcessInput(GLFWwindow* window)
 	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
 		gCamera.ProcessKeyboard(UP, gDeltaTime);
 
-	//Veiw Change
+	//View Change
 	if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
 		isPerspective = !isPerspective;
 }
@@ -2892,7 +2899,7 @@ void URender()
 	// 1. Scales the object
 	scale = glm::scale(glm::vec3(3.0f, 2.0f, 1.0f));
 	// 2. Rotate the object
-	rotation = glm::rotate(0.0f, glm::vec3(1.0, 1.0f, 1.0f));	
+	rotation = glm::rotate(0.0f, glm::vec3(1.0, 1.0f, 1.0f));
 	// 3. Position the object
 	translation = glm::translate(glm::vec3(-6.0f, 0.001f, 2.0f));
 	// Model matrix: transformations are applied right-to-left order
@@ -3104,7 +3111,7 @@ void UDestroyTexture(GLuint textureId)
 }
 
 // Implements the UCreateShaders function
-bool UCreateShaderProgram(const char* vtxShaderSource, const char* fragShaderSource, GLuint &programId)
+bool UCreateShaderProgram(const char* vtxShaderSource, const char* fragShaderSource, GLuint& programId)
 {
 	// Compilation and linkage error reporting
 	int success = 0;

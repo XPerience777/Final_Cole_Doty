@@ -19,18 +19,18 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\meshes.cpp" />
-    <ClCompile Include="..\..\main.cpp" />
+    <ClCompile Include="..\..\Final_meshes.cpp" />
+    <ClCompile Include="..\..\Final_Source.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\meshes.h" />
+    <ClInclude Include="..\..\Final_meshes.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{5EC1CCC7-16EE-475B-9878-CEC029C39EEA}</ProjectGuid>
     <RootNamespace>tutorial0405</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>CS499_openGL_Cole_Doty</ProjectName>
+    <ProjectName>Final_Cole_Doty</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
